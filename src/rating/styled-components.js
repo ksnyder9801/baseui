@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -18,7 +18,7 @@ import {
   veryHappyRatingSVG,
 } from './svg-icons.js';
 
-export const StyledRoot = styled('ul', ({$theme}: StyledRootPropsT) => {
+export const StyledRoot = styled<StyledRootPropsT>('ul', ({$theme}) => {
   return {
     marginLeft: 0,
     marginRight: 0,
@@ -35,14 +35,27 @@ export const StyledRoot = styled('ul', ({$theme}: StyledRootPropsT) => {
   };
 });
 
-export const StyledStar = styled(
+export const StyledStar = styled<StyledRatingItemPropsT>(
   'li',
-  ({$theme, $isActive, $isSelected}: StyledRatingItemPropsT) => {
+  ({
+    $theme,
+    $isActive,
+    $isPartialActive,
+    $isSelected,
+    $isFocusVisible,
+    $isReadOnly,
+    $size,
+  }) => {
     let starStroke = $theme.colors.mono500;
     let starFill = $theme.colors.mono300;
+    let prePartialStarStroke;
+    let prePartialStarFill;
 
     if ($isActive) {
       starStroke = starFill = $theme.colors.rating400;
+    }
+    if ($isPartialActive && !$isActive) {
+      prePartialStarStroke = prePartialStarFill = $theme.colors.rating400;
     }
 
     const styles = {
@@ -51,22 +64,46 @@ export const StyledStar = styled(
       paddingBottom: 0,
       paddingRight: 0,
       display: 'inline-block',
-      transition: `all ${$theme.animation.timing400}`,
-      cursor: 'pointer',
+      transition: `transform ${$theme.animation.timing400}`,
+      cursor: $isReadOnly ? 'default' : 'pointer',
       marginLeft: 0,
       marginTop: 0,
       marginBottom: 0,
       marginRight: $theme.sizing.scale300,
-      width: '22px',
-      height: '20px',
-      transform: $isSelected ? 'scale(1.35)' : '',
-      ':focus': {
-        outline: 'none',
-      },
+      width: `${$size}px`,
+      height: `${$size}px`,
+      lineHeight: 1,
+      transform: $isSelected ? 'scale(1.35)' : null,
+      outline: $isFocusVisible ? `3px solid ${$theme.colors.accent}` : 'none',
+      outlineOffset: '2px',
+      position: 'relative',
       ':after': {
         transition: `all ${$theme.animation.timing400}`,
         content:
-          `url('data:image/svg+xml,` + starSVG(starFill, starStroke) + `')`,
+          `url('data:image/svg+xml,` +
+          starSVG(starFill, starStroke, $size) +
+          `')`,
+        height: '100%',
+      },
+      ':before':
+        prePartialStarFill && prePartialStarStroke
+          ? {
+              transition: `all ${$theme.animation.timing400}`,
+              position: 'absolute',
+              display: 'block',
+              top: 0,
+              left: 0,
+              width: '50%',
+              height: '100%',
+              overflow: 'hidden',
+              content:
+                `url('data:image/svg+xml,` +
+                starSVG(prePartialStarFill, prePartialStarStroke, $size) +
+                `')`,
+            }
+          : {},
+      ':last-of-type': {
+        marginRight: 0,
       },
     };
 
@@ -74,9 +111,17 @@ export const StyledStar = styled(
   },
 );
 
-export const StyledEmoticon = styled(
+export const StyledEmoticon = styled<StyledRatingItemPropsT>(
   'li',
-  ({$theme, $isActive, $isSelected, $index = 1}: StyledRatingItemPropsT) => {
+  ({
+    $theme,
+    $isActive,
+    $isSelected,
+    $index = 1,
+    $isFocusVisible,
+    $isReadOnly,
+    $size,
+  }) => {
     let emoticonFill = $theme.colors.mono500;
 
     if ($isActive) {
@@ -84,11 +129,11 @@ export const StyledEmoticon = styled(
     }
 
     const ratingIcons = [
-      angryRatingSVG(emoticonFill),
-      sadRatingSVG(emoticonFill),
-      neutralRatingSVG(emoticonFill),
-      happyRatingSVG(emoticonFill),
-      veryHappyRatingSVG(emoticonFill),
+      angryRatingSVG(emoticonFill, $size),
+      sadRatingSVG(emoticonFill, $size),
+      neutralRatingSVG(emoticonFill, $size),
+      happyRatingSVG(emoticonFill, $size),
+      veryHappyRatingSVG(emoticonFill, $size),
     ];
 
     const styles = {
@@ -97,18 +142,17 @@ export const StyledEmoticon = styled(
       paddingRight: 0,
       paddingBottom: 0,
       display: 'inline-block',
-      transition: `all ${$theme.animation.timing400}`,
-      cursor: 'pointer',
+      transition: `transform ${$theme.animation.timing400}`,
+      cursor: $isReadOnly ? 'default' : 'pointer',
       marginLeft: 0,
       marginTop: 0,
       marginBottom: 0,
       marginRight: $theme.sizing.scale300,
-      width: '44px',
-      height: '44px',
-      transform: $isSelected ? 'scale(1.1)' : '',
-      ':focus': {
-        outline: 'none',
-      },
+      width: `${$size}px`,
+      height: `${$size}px`,
+      transform: $isSelected ? 'scale(1.1)' : null,
+      outline: $isFocusVisible ? `3px solid ${$theme.colors.accent}` : 'none',
+      outlineOffset: '2px',
       ':after': {
         transition: `all ${$theme.animation.timing400}`,
         content: `url('data:image/svg+xml,` + ratingIcons[$index - 1] + `')`,

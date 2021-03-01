@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -9,8 +9,6 @@ LICENSE file in the root directory of this source tree.
 import * as React from 'react';
 
 import {Tabs, Tab} from '../index.js';
-
-export const name = 'tabs-controlled';
 
 type StateT = {
   activeKey: string,
@@ -30,15 +28,19 @@ class Example extends React.Component<{}, StateT> {
     return (
       <React.Fragment>
         <Tabs activeKey={this.state.activeKey} onChange={this.onChange}>
-          <Tab title="Tab Link 1" />
-          <Tab title="Tab Link 2" />
-          <Tab title="Tab Link 3" />
+          <Tab title="Tab Link 1">
+            <div>{content[Number(this.state.activeKey)]}</div>
+          </Tab>
+          <Tab title="Tab Link 2">
+            <div>{content[Number(this.state.activeKey)]}</div>
+          </Tab>
+          <Tab title="Tab Link 3">
+            <div>{content[Number(this.state.activeKey)]}</div>
+          </Tab>
         </Tabs>
-        <div>Content:</div>
-        <div>{content[Number(this.state.activeKey)]}</div>
       </React.Fragment>
     );
   }
 }
 
-export const component = () => <Example />;
+export default Example;

@@ -1,16 +1,14 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 
 import {StatefulMenu, NestedMenus} from '../index.js';
-
-export const name = 'menu-child';
 
 const OPEN_RECENT = 'Open Recent ->';
 const NEW_BREAKPOINT = 'New Breakpoint ->';
@@ -62,30 +60,32 @@ const childMenu = items => (
   />
 );
 
-export const component = () => (
-  <NestedMenus>
-    <StatefulMenu
-      items={FILE}
-      overrides={{
-        List: {
-          style: {width: '300px', overflow: 'auto'},
-          props: {'data-e2e': 'parent-menu'},
-        },
-        Option: {
-          props: {
-            size: 'compact',
-            getChildMenu: item => {
-              if (item.label === OPEN_RECENT) {
-                return childMenu(RECENT_FILES);
-              }
+export default function Scenario() {
+  return (
+    <NestedMenus>
+      <StatefulMenu
+        items={FILE}
+        overrides={{
+          List: {
+            style: {width: '300px', overflow: 'auto'},
+            props: {'data-e2e': 'parent-menu'},
+          },
+          Option: {
+            props: {
+              size: 'compact',
+              getChildMenu: item => {
+                if (item.label === OPEN_RECENT) {
+                  return childMenu(RECENT_FILES);
+                }
 
-              if (item.label === NEW_BREAKPOINT) {
-                return childMenu(BREAKPOINTS);
-              }
+                if (item.label === NEW_BREAKPOINT) {
+                  return childMenu(BREAKPOINTS);
+                }
+              },
             },
           },
-        },
-      }}
-    />
-  </NestedMenus>
-);
+        }}
+      />
+    </NestedMenus>
+  );
+}

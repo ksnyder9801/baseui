@@ -1,12 +1,12 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 
 import {Block} from '../../block/index.js';
 import {Button, KIND} from '../../button/index.js';
@@ -16,8 +16,6 @@ import {Pagination} from '../../pagination/index.js';
 import {StatefulPopover, PLACEMENT} from '../../popover/index.js';
 
 import {Table} from '../index.js';
-
-export const name = 'table-pagination';
 
 const COLUMNS = [...new Array(5)].map(() => 'Label');
 const DATA = [...new Array(45)].map((_, i) =>
@@ -108,4 +106,6 @@ class PaginatedTable extends React.Component<any, any> {
   }
 }
 
-export const component = () => <PaginatedTable columns={COLUMNS} data={DATA} />;
+export default function Scenario() {
+  return <PaginatedTable columns={COLUMNS} data={DATA} />;
+}

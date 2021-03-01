@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -37,12 +37,11 @@ export const ACCESSIBILITY_TYPE = {
   menu: 'menu',
   tooltip: 'tooltip',
 };
-
 export const POPOVER_MARGIN = 8;
 
 export const ARROW_SIZE = 6;
 
-export const ANIMATE_OUT_TIME = 500;
+export const ANIMATE_OUT_TIME = 0;
 
 export const ANIMATE_IN_TIME = 20;
 

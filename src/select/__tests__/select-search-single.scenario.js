@@ -1,34 +1,16 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
-import Screener, {Steps} from 'screener-storybook/src/screener.js';
+import * as React from 'react';
 
 import {StatefulSelect, TYPE} from '../index.js';
 
-export const name = 'select-search-single';
-
-export const component = () => {
-  const selector = '[data-baseweb="select"] input';
-  return (
-    <Screener
-      steps={new Steps()
-        .wait(selector)
-        .click(selector)
-        .snapshot('select: open state')
-        .end()}
-    >
-      <SelectComponent />
-    </Screener>
-  );
-};
-
-function SelectComponent() {
+export default function SelectComponent() {
   return (
     <StatefulSelect
       options={[
@@ -39,7 +21,10 @@ function SelectComponent() {
         {id: 'Azure', color: '#F0FFFF'},
         {id: 'Beige', color: '#F5F5DC'},
       ]}
-      overrides={{ValueContainer: {props: {'data-id': 'selected'}}}}
+      overrides={{
+        ValueContainer: {props: {'data-id': 'selected'}},
+        ClearIcon: {props: {'data-id': 'clear-icon'}},
+      }}
       labelKey="id"
       valueKey="color"
       type={TYPE.search}

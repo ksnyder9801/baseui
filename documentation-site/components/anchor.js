@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -8,11 +8,15 @@ LICENSE file in the root directory of this source tree.
 
 import * as React from 'react';
 
-import {styled} from 'baseui';
+import {themedStyled} from '../pages/_app';
 
-const Wrapper = styled('a', ({$isVisible}) => ({
+const Wrapper = themedStyled('a', ({$isVisible, $theme}) => ({
   visibility: $isVisible ? 'visible' : 'hidden',
-  color: '#000',
+  color: $theme.colors.primary,
+  ':focus': {
+    outline: `3px solid ${$theme.colors.accent}`,
+    outlineOffset: '1px',
+  },
 }));
 
 const elementToSize = element => {

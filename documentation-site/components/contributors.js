@@ -1,12 +1,12 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 import {Avatar} from 'baseui/avatar';
 import {Block} from 'baseui/block';
 import {H2} from './markdown-elements';
@@ -25,29 +25,48 @@ function Contributors(props: {contributors: Contributor[]}) {
     return null;
   }
 
+  const users = props.contributors.filter(isUser);
+
   return (
     <React.Fragment>
-      <H2>Thanks to our contributors</H2>
+      <H2>Thanks to our {users.length} contributors</H2>
       <Block display="flex" flexWrap>
-        {props.contributors.filter(isUser).map(contributor => (
+        {users.map(contributor => (
           <Block
             as="a"
             href={contributor.html_url}
             target="_blank"
             marginRight="scale200"
             key={contributor.login}
+            title={contributor.login}
+            overrides={{
+              Block: {
+                style: ({$theme}) => ({
+                  ':focus > div > img': {
+                    boxShadow: `0 0 0 3px ${$theme.colors.accent}`,
+                    outline: 'none',
+                  },
+                  ':focus': {
+                    outline: 'none',
+                  },
+                }),
+              },
+            }}
           >
             <Avatar
               name={contributor.login}
-              src={contributor.avatar_url}
+              // GH supports downloading smaller images using the s query string
+              // https://styleguide.github.com/primer/components/avatars/#small-avatars
+              src={`${contributor.avatar_url}&s=64`}
               overrides={{
                 Root: {
                   style: ({$theme}) => ({
-                    ...$theme.borders.border300,
-                    borderColor: $theme.colors.mono100,
+                    margin: $theme.sizing.scale100,
+                    transitionProperty: 'all',
+                    transitionDuration: $theme.animation.timing200,
+                    transitionTimingFunction: $theme.animation.easeInOutCurve,
                     ':hover': {
-                      borderColor: $theme.colors.primary,
-                      cursor: 'pointer',
+                      transform: 'scale(1.2)',
                     },
                   }),
                 },

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -9,50 +9,73 @@ LICENSE file in the root directory of this source tree.
 import * as React from 'react';
 
 import {getOverrides} from '../helpers/overrides.js';
-import TriangleDown from '../icon/triangle-down.js';
 import TriangleUp from '../icon/triangle-up.js';
+import TriangleDown from '../icon/triangle-down.js';
 
+import {SORT_DIRECTION} from './constants.js';
 import {StyledHeadCell, StyledSortableLabel} from './styled-components.js';
-import type {HeadCellPropsT} from './types.js';
+import type {SortDirectionT, HeadCellPropsT} from './types.js';
 
-function Direction(props: {direction: 'ASC' | 'DESC' | null}) {
-  if (props.direction === 'ASC') {
-    return <TriangleDown />;
+function SortDirectionIcon({direction}: {direction: SortDirectionT}) {
+  switch (direction) {
+    case SORT_DIRECTION.ASC:
+      return <TriangleUp title="Sort ascending" />;
+    case SORT_DIRECTION.DESC:
+      return <TriangleDown title="Sort descending" />;
+    default:
+      return null;
   }
-
-  if (props.direction === 'DESC') {
-    return <TriangleUp />;
-  }
-
-  return null;
 }
+export const SortableHeadCellFactory = (
+  CustomHeadCell: React.ComponentType<HeadCellPropsT> = StyledHeadCell,
+) => {
+  return function SortableHeadCell(props: HeadCellPropsT) {
+    const {overrides = {}, fillClickTarget, disabled} = props;
 
-export default function SortableHeadCell(props: HeadCellPropsT) {
-  const {overrides = {}} = props;
+    const [HeadCell, headCellProps] = getOverrides(
+      overrides.HeadCell,
+      CustomHeadCell,
+    );
 
-  const [HeadCell, headCellProps] = getOverrides(
-    overrides.HeadCell,
-    StyledHeadCell,
-  );
-  const [SortableLabel, sortableLabelProps] = getOverrides(
-    overrides.SortableLabel,
-    StyledSortableLabel,
-  );
+    const [SortableLabel, sortableLabelProps] = getOverrides(
+      overrides.SortableLabel,
+      StyledSortableLabel,
+    );
 
-  return (
-    <HeadCell role="columnheader" {...headCellProps}>
-      <SortableLabel
-        aria-label={`sorts table by ${props.title} column`}
-        disabled={props.disabled}
-        onClick={() => {
-          props.onSort && props.onSort();
-        }}
-        {...sortableLabelProps}
+    const onClick = () => {
+      props.onSort && props.onSort();
+    };
+    const enableHeadClick = fillClickTarget && !disabled;
+
+    let ariaLabel = props.ariaLabel;
+    if (!ariaLabel) {
+      if (typeof props.title === 'string') {
+        ariaLabel = `sorts table by ${props.title} column`;
+      } else {
+        ariaLabel = 'sort table by column';
+      }
+    }
+
+    return (
+      <HeadCell
+        role="columnheader"
+        {...headCellProps}
+        $cursor={enableHeadClick ? 'pointer' : undefined}
+        onClick={enableHeadClick ? onClick : undefined}
       >
-        <Direction direction={props.direction} />
-        {props.title}
-      </SortableLabel>
-      {props.children}
-    </HeadCell>
-  );
-}
+        <SortableLabel
+          aria-label={ariaLabel}
+          disabled={disabled}
+          onClick={!fillClickTarget ? onClick : undefined}
+          {...sortableLabelProps}
+        >
+          <SortDirectionIcon direction={props.direction} />
+          {props.title}
+        </SortableLabel>
+        {props.children}
+      </HeadCell>
+    );
+  };
+};
+
+export default SortableHeadCellFactory();

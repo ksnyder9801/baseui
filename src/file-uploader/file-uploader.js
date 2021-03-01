@@ -1,25 +1,26 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 import Dropzone from 'react-dropzone';
 
 import {LocaleContext} from '../locale/index.js';
 import {Block} from '../block/index.js';
-import {Button, KIND} from '../button/index.js';
+import {Button, KIND, SHAPE, SIZE as BUTTON_SIZE} from '../button/index.js';
 import {getOverrides} from '../helpers/overrides.js';
 import {ProgressBar} from '../progress-bar/index.js';
-import {Spinner} from '../spinner/index.js';
+import {StyledSpinnerNext, SIZE as SPINNER_SIZE} from '../spinner/index.js';
 
 import {
   StyledRoot,
   StyledFileDragAndDrop,
   StyledContentMessage,
+  StyledContentSeparator,
   StyledErrorMessage,
   StyledHiddenInput,
 } from './styled-components.js';
@@ -44,6 +45,11 @@ function FileUploader(props: PropsT) {
     overrides.ContentMessage,
     StyledContentMessage,
   );
+
+  const [ContentSeparator, contentSeparatorProps] = getOverrides(
+    overrides.ContentSeparator,
+    StyledContentSeparator,
+  );
   const [ErrorMessage, errorMessageProps] = getOverrides(
     overrides.ErrorMessage,
     StyledErrorMessage,
@@ -55,6 +61,11 @@ function FileUploader(props: PropsT) {
   const [ButtonComponent, buttonProps] = getOverrides(
     overrides.ButtonComponent,
     Button,
+  );
+
+  const [SpinnerComponent, spinnerProps] = getOverrides(
+    overrides.Spinner,
+    StyledSpinnerNext,
   );
 
   const afterFileDrop = !!(
@@ -75,11 +86,11 @@ function FileUploader(props: PropsT) {
         });
 
         const getRootPropsArgs: {
-          refKey: string,
           onClick?: (SyntheticEvent<HTMLElement>) => void,
+          tabIndex: string,
         } = {
-          refKey: '$ref',
-          onClick: props.disableClick ? evt => evt.preventDefault() : undefined,
+          ...(props.disableClick ? {onClick: evt => evt.preventDefault()} : {}),
+          tabIndex: '-1',
         };
 
         return (
@@ -103,24 +114,27 @@ function FileUploader(props: PropsT) {
                       >
                         {locale.fileuploader.dropFilesToUpload}
                       </ContentMessage>
-                      <ContentMessage
+                      {/* TODO(v11): ContentSeparator potentially can be removed in the next major version */}
+                      <ContentSeparator
                         {...prefixedStyledProps}
-                        {...contentMessageProps}
+                        {...contentSeparatorProps}
                       >
                         {locale.fileuploader.or}
-                      </ContentMessage>
-
+                      </ContentSeparator>
                       <ButtonComponent
-                        aria-controls="fileupload"
                         disabled={props.disabled}
-                        kind={KIND.minimal}
+                        kind={KIND.secondary}
+                        shape={SHAPE.pill}
+                        size={BUTTON_SIZE.compact}
                         onClick={open}
+                        role="button"
                         overrides={{
                           BaseButton: {
-                            style: {outline: null, fontWeight: 'normal'},
+                            style: ({$theme}) => ({
+                              marginTop: $theme.sizing.scale500,
+                            }),
                           },
                         }}
-                        role="button"
                         {...prefixedStyledProps}
                         {...buttonProps}
                       >
@@ -145,14 +159,17 @@ function FileUploader(props: PropsT) {
                               style: ({$theme}) => ({
                                 backgroundColor: props.errorMessage
                                   ? $theme.colors.negative
-                                  : $theme.colors.primary,
+                                  : $theme.colors.accent,
                               }),
                             },
                           }}
                         />
-                      ) : (
+                      ) : props.errorMessage ? null : (
                         <Block marginBottom="scale300">
-                          <Spinner size={40} />
+                          <SpinnerComponent
+                            $size={SPINNER_SIZE.medium}
+                            {...spinnerProps}
+                          />
                         </Block>
                       )}
                       {(props.errorMessage || props.progressMessage) &&
@@ -177,11 +194,9 @@ function FileUploader(props: PropsT) {
                           onClick={() => {
                             props.onRetry && props.onRetry();
                           }}
-                          overrides={{
-                            BaseButton: {
-                              style: {outline: null, fontWeight: 'normal'},
-                            },
-                          }}
+                          aria-invalid={Boolean(props.errorMessage)}
+                          aria-describedby={props['aria-describedby']}
+                          aria-errormessage={props.errorMessage}
                         >
                           {locale.fileuploader.retry}
                         </ButtonComponent>
@@ -191,9 +206,12 @@ function FileUploader(props: PropsT) {
                           onClick={() => {
                             props.onCancel && props.onCancel();
                           }}
+                          aria-describedby={props['aria-describedby']}
                           overrides={{
                             BaseButton: {
-                              style: {outline: null, fontWeight: 'normal'},
+                              style: ({$theme}) => ({
+                                color: $theme.colors.contentNegative,
+                              }),
                             },
                           }}
                         >
@@ -205,7 +223,10 @@ function FileUploader(props: PropsT) {
                 </FileDragAndDrop>
 
                 <HiddenInput
-                  {...getInputProps({refKey: '$ref'})}
+                  aria-invalid={Boolean(props.errorMessage) || null}
+                  aria-describedby={props['aria-describedby']}
+                  aria-errormessage={props.errorMessage || null}
+                  {...getInputProps()}
                   {...prefixedStyledProps}
                   {...hiddenInputProps}
                 />

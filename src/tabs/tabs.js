@@ -1,12 +1,12 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 import * as React from 'react';
-import {getOverrides} from '../helpers/overrides.js';
+import {getOverrides, mergeOverrides} from '../helpers/overrides.js';
 import {
   Root as StyledRoot,
   TabBar as StyledTabBar,
@@ -21,6 +21,7 @@ export default class Tabs extends React.Component<TabsPropsT> {
     onChange: () => {},
     overrides: {},
     orientation: ORIENTATION.horizontal,
+    renderAll: false,
   };
 
   onChange({activeKey}: {activeKey: string}) {
@@ -29,7 +30,13 @@ export default class Tabs extends React.Component<TabsPropsT> {
   }
 
   getTabs() {
-    const {activeKey, disabled, orientation, children} = this.props;
+    const {
+      activeKey,
+      disabled,
+      orientation,
+      children,
+      overrides = {},
+    } = this.props;
     // eslint-disable-next-line flowtype/no-weak-types
     const tabs = React.Children.map(children, (child: any, index) => {
       if (!child) return;
@@ -43,6 +50,7 @@ export default class Tabs extends React.Component<TabsPropsT> {
         $orientation: orientation,
         onSelect: () => this.onChange({activeKey: key}),
         children: child.props.title,
+        overrides: mergeOverrides(overrides, child.props.overrides || {}),
       });
     });
 
@@ -56,6 +64,7 @@ export default class Tabs extends React.Component<TabsPropsT> {
       orientation,
       children,
       overrides = {},
+      renderAll,
     } = this.props;
     const {TabContent: TabContentOverride} = overrides;
     const [TabContent, tabContentProps] = getOverrides(
@@ -84,7 +93,8 @@ export default class Tabs extends React.Component<TabsPropsT> {
           {...tabContentProps}
           {...props}
         >
-          {isActive ? child.props.children : null}
+          {renderAll ? child.props.children : null}
+          {isActive && !renderAll ? child.props.children : null}
         </TabContent>
       );
     });

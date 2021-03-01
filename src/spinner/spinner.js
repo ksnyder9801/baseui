@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -8,7 +8,7 @@ LICENSE file in the root directory of this source tree.
 import * as React from 'react';
 
 import {mergeOverrides, getOverrides} from '../helpers/overrides.js';
-import {Icon} from '../icon/index.js';
+import Icon from '../icon/icon.js';
 
 import {
   Svg as StyledSvg,
@@ -25,6 +25,19 @@ class Spinner extends React.Component<SpinnerPropsT> {
     overrides: {},
   };
 
+  componentDidMount() {
+    // TODO(v11): remove warning when switching default Spinner
+    if (__DEV__) {
+      if (!this.props.$silenceV11DeprecationWarning) {
+        console.warn(
+          `❖ [baseui] Please consider using "StyledSpinnerNext" instead of "Spinner". ` +
+            `In v11, "StyledSpinnerNext" will become the default "Spinner"` +
+            ` and the current SVG based implementation will be deprecated.`,
+        );
+      }
+    }
+  }
+
   render() {
     const {overrides = {}} = this.props;
     const mergedOverrides = mergeOverrides({Svg: StyledSvg}, overrides);
@@ -39,6 +52,7 @@ class Spinner extends React.Component<SpinnerPropsT> {
 
     return (
       <Icon
+        aria-label={this.props['aria-label'] || 'Loading'}
         data-baseweb="spinner"
         title="Spinner"
         viewBox="3 3 18 18"

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -7,9 +7,15 @@ LICENSE file in the root directory of this source tree.
 // @flow
 /* eslint-disable flowtype/generic-spacing */
 import * as React from 'react';
-import type {ThemeT} from '../styles/types.js';
 import type {OverrideT} from '../helpers/overrides.js';
 import {ORIENTATION, STATE_CHANGE_TYPE} from './constants.js';
+
+export type SharedStylePropsArgT = {
+  $disabled?: boolean,
+  $active?: boolean,
+  $orientation?: $Values<typeof ORIENTATION>,
+  $isFocusVisible?: boolean,
+};
 
 export type StatefulTabsStateT = {
   activeKey: React.Key,
@@ -23,21 +29,23 @@ export type StateReducerT = (
   currentState: StatefulTabsStateT,
 ) => StatefulTabsStateT;
 
-export type TabsOverridesT<T> = {
-  Root?: OverrideT<T>,
-  TabBar?: OverrideT<T>,
-  TabContent?: OverrideT<T>,
+export type TabsOverridesT = {
+  Root?: OverrideT,
+  TabBar?: OverrideT,
+  TabContent?: OverrideT,
+  Tab?: OverrideT,
 };
 
-export type TabOverridesT<T> = {
-  Tab?: OverrideT<T>,
+export type TabOverridesT = {
+  Tab?: OverrideT,
 };
 
 export type OnChangeHandlerT = ({activeKey: React.Key}) => mixed;
 
 export type TabsPropsT = {
   /** An array of Tab components. */
-  children: Array<React.Node>,
+  // eslint-disable-next-line flowtype/no-weak-types
+  children: React.ChildrenArray<React.Element<any>>,
   /**  Key of the the tab to be selected. */
   activeKey: React.Key,
   /** If set to true all its tabs will be disabled */
@@ -46,7 +54,9 @@ export type TabsPropsT = {
   onChange?: OnChangeHandlerT,
   /** Sets the orientation of the Tab component */
   orientation?: $Values<typeof ORIENTATION>,
-  overrides?: TabsOverridesT<$Diff<SharedStylePropsArgT, {$active?: ?boolean}>>,
+  /** Renders all tab content for SEO purposes regardless of tab active state */
+  renderAll?: boolean,
+  overrides?: TabsOverridesT,
 };
 
 export type StatefulTabsPropsT = $Diff<TabsPropsT, {activeKey: React.Key}> & {
@@ -69,7 +79,7 @@ export type TabPanelPropsT = {
   onKeyDown?: (e: KeyboardEvent) => mixed,
   /** onSelect handler for the Tab element */
   onSelect?: () => mixed,
-  overrides?: TabOverridesT<SharedStylePropsArgT>,
+  overrides?: TabOverridesT,
   /** Title of the Tab to be shown in the Tab bar */
   title?: React.Node,
 };
@@ -77,20 +87,4 @@ export type TabPanelPropsT = {
 export type TabPropsT = TabPanelPropsT & {
   id?: string,
   $orientation?: $Values<typeof ORIENTATION>,
-};
-
-export type SharedStylePropsArgT = {
-  $disabled: ?boolean,
-  $active?: ?boolean,
-  $orientation?: $Values<typeof ORIENTATION>,
-  // Styletron stuff
-  $as?: string,
-  // styled function wrapper related
-  $style?: ?{},
-  /* eslint-disable flowtype/no-weak-types */
-  $ref?: React.Ref<any>,
-};
-
-export type SharedStylePropsT = SharedStylePropsArgT & {
-  $theme: ThemeT,
 };

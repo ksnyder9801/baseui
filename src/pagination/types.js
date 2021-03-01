@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -7,12 +7,15 @@ LICENSE file in the root directory of this source tree.
 // @flow
 import type {OverrideT} from '../helpers/overrides.js';
 import {STATE_CHANGE_TYPE} from './constants.js';
+import {SIZE} from '../input/constants.js';
 
 export type LabelsT = {
   prevButton?: string,
   nextButton?: string,
   preposition?: string,
 };
+
+export type SizeT = $Keys<typeof SIZE>;
 
 export type CallbacksT = {
   /** Callback for prev button click. */
@@ -30,13 +33,12 @@ export type StateReducerFnT = (
 ) => StatefulContainerStateT;
 
 export type OverridesT = {
-  Root?: OverrideT<*>,
-  PrevButton?: OverrideT<*>,
-  NextButton?: OverrideT<*>,
-  MaxLabel?: OverrideT<*>,
-  DropdownContainer?: OverrideT<*>,
-  DropdownButton?: OverrideT<*>,
-  DropdownMenu?: OverrideT<*>,
+  Root?: OverrideT,
+  PrevButton?: OverrideT,
+  NextButton?: OverrideT,
+  MaxLabel?: OverrideT,
+  DropdownContainer?: OverrideT,
+  Select?: OverrideT,
 };
 
 export type PaginationPropsT = CallbacksT & {
@@ -47,10 +49,7 @@ export type PaginationPropsT = CallbacksT & {
   /** Set of labels to use for the buttons and preposition. */
   labels?: LabelsT,
   overrides?: OverridesT,
-};
-
-export type PaginationStateT = {
-  isMenuOpen: boolean,
+  size?: SizeT,
 };
 
 export type StatefulPaginationPropsT = CallbacksT & {

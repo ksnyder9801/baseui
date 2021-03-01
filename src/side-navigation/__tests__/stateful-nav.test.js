@@ -1,22 +1,23 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
-import React from 'react';
-import {shallow} from 'enzyme';
+import * as React from 'react';
+import {render, getByText} from '@testing-library/react';
+
 import StatefulNavigation from '../stateful-nav.js';
 
 const nav = [
   {
     title: 'Colors',
-    subnav: [
+    subNav: [
       {
         title: 'Shades',
         itemId: '#level1.1.2',
-        subnav: [
+        subNav: [
           {
             title: 'Light',
             itemId: '#level1.1.2.2',
@@ -41,10 +42,9 @@ describe('Navigation', () => {
       items: nav,
       onChange: jest.fn(),
     };
-    const component = shallow(<StatefulNavigation {...props} />);
-    expect(component).toMatchSnapshot('renders <StatefulContainer/>');
-    expect(component.dive()).toMatchSnapshot(
-      'renders <Navigation/> as a child',
-    );
+    const {container} = render(<StatefulNavigation {...props} />);
+    getByText(container, 'Colors');
+    getByText(container, 'Sizing');
+    getByText(container, 'Typography');
   });
 });

@@ -1,16 +1,14 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 
 import {StatefulMenu} from '../index.js';
-
-export const name = 'menu-stateful';
 
 const ITEMS = [
   {label: 'Item One'},
@@ -27,21 +25,26 @@ const ITEMS = [
   {label: 'Item Twelve'},
 ];
 
-export const component = () => (
-  <StatefulMenu
-    items={ITEMS}
-    overrides={{
-      List: {
-        style: {
-          height: '100px',
-          width: '350px',
+export default function Scenario() {
+  return (
+    <StatefulMenu
+      initialState={{
+        highlightedIndex: 5,
+      }}
+      items={ITEMS}
+      overrides={{
+        List: {
+          style: {
+            height: '300px',
+            width: '350px',
+          },
         },
-      },
-      Option: {
-        props: {
-          getItemLabel: item => item.label,
+        Option: {
+          props: {
+            getItemLabel: item => item.label,
+          },
         },
-      },
-    }}
-  />
-);
+      }}
+    />
+  );
+}

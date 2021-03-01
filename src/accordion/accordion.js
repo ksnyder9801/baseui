@@ -1,10 +1,11 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
+/* eslint-disable cup/no-undef */
 import * as React from 'react';
 import {getOverrides} from '../helpers/overrides.js';
 import {Root as StyledRoot} from './styled-components.js';
@@ -13,7 +14,6 @@ import type {
   AccordionPropsT,
   AccordionStateT,
   StateChangeTypeT,
-  SharedStylePropsArgT,
 } from './types.js';
 
 export default class Accordion extends React.Component<
@@ -28,6 +28,8 @@ export default class Accordion extends React.Component<
     },
     onChange: () => {},
     overrides: {},
+    renderAll: false,
+    renderPanelContent: false,
     stateReducer: (type, newState) => newState,
   };
 
@@ -54,6 +56,7 @@ export default class Accordion extends React.Component<
     }
     const newState = {expanded: activeKeys};
     this.internalSetState(STATE_CHANGE_TYPE.expand, newState);
+    // Call individual panel's onChange handler
     if (typeof onChange === 'function') onChange(...args);
   }
 
@@ -66,26 +69,34 @@ export default class Accordion extends React.Component<
 
   getItems() {
     const {expanded} = this.state;
-    const {accordion, disabled, children} = this.props;
+    const {
+      accordion,
+      disabled,
+      children,
+      renderPanelContent,
+      renderAll,
+      overrides,
+    } = this.props;
     // eslint-disable-next-line flowtype/no-weak-types
     const newChildren = React.Children.map(children, (child: *, index) => {
       if (!child) return;
-      // If there is no key provide, use the panel order as default key
-      // $FlowFixMe
+      // If there is no key provided use the panel order as a default key
       const key = child.key || String(index);
       let isExpanded = false;
       if (accordion) {
         isExpanded = expanded[0] === key;
       } else {
-        isExpanded = expanded.indexOf(key) > -1;
+        isExpanded = expanded.includes(key);
       }
 
       const props = {
         key,
-        expanded: isExpanded,
+        expanded: isExpanded || child.props.expanded,
         accordion,
-        disabled:
-          child.props.disabled === null ? disabled : child.props.disabled,
+        renderPanelContent,
+        renderAll,
+        overrides: child.props.overrides || overrides,
+        disabled: child.props.disabled || disabled,
         onChange: (...args) =>
           this.onPanelChange(key, child.props.onChange, ...args),
       };
@@ -94,20 +105,26 @@ export default class Accordion extends React.Component<
     return newChildren;
   }
 
-  getSharedProps(): SharedStylePropsArgT {
-    const {disabled} = this.props;
-    return {
-      $disabled: disabled,
-    };
+  componentDidMount() {
+    // TODO(v11)
+    if (__DEV__ && this.props.renderPanelContent) {
+      console.warn(
+        'baseui:Accordion The `renderPanelContent` prop is deprecated. Please update your code to use `renderAll`.',
+      );
+    }
   }
 
   render() {
-    const sharedProps = this.getSharedProps();
     const {overrides = {}} = this.props;
     const {Root: RootOverride} = overrides;
     const [Root, rootProps] = getOverrides(RootOverride, StyledRoot);
     return (
-      <Root data-baseweb="accordion" {...sharedProps} {...rootProps}>
+      <Root
+        data-baseweb="accordion"
+        $disabled={this.props.disabled}
+        $isFocusVisible={false}
+        {...rootProps}
+      >
         {this.getItems()}
       </Root>
     );

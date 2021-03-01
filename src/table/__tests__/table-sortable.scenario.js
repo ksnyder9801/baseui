@@ -1,12 +1,12 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 
 import {
   StyledTable,
@@ -15,9 +15,8 @@ import {
   StyledRow,
   StyledCell,
   SortableHeadCell,
+  SORT_DIRECTION,
 } from '../index.js';
-
-export const name = 'table-sortable';
 
 const DATA = [
   ['Marlyn', 10],
@@ -48,14 +47,14 @@ class SortableTable extends React.Component<any, any> {
 
   handleSort = (title: string, prevDirection: ?string) => {
     let nextDirection = null;
-    if (prevDirection === 'ASC') {
-      nextDirection = 'DESC';
+    if (prevDirection === SORT_DIRECTION.ASC) {
+      nextDirection = SORT_DIRECTION.DESC;
     }
-    if (prevDirection === 'DESC') {
+    if (prevDirection === SORT_DIRECTION.DESC) {
       nextDirection = null;
     }
     if (prevDirection === null) {
-      nextDirection = 'ASC';
+      nextDirection = SORT_DIRECTION.ASC;
     }
 
     if (title === 'name') {
@@ -74,22 +73,22 @@ class SortableTable extends React.Component<any, any> {
       // $FlowFixMe
       const sorted = DATA.slice(0).sort((a, b) => a[0].localeCompare(b[0]));
 
-      if (this.state.nameDirection === 'ASC') {
+      if (this.state.nameDirection === SORT_DIRECTION.ASC) {
         return sorted;
       }
 
-      if (this.state.nameDirection === 'DESC') {
+      if (this.state.nameDirection === SORT_DIRECTION.DESC) {
         return sorted.reverse();
       }
     }
 
     if (this.state.ageDirection) {
       const sorted = DATA.slice(0).sort((a, b) => a[1] - b[1]);
-      if (this.state.ageDirection === 'ASC') {
+      if (this.state.ageDirection === SORT_DIRECTION.ASC) {
         return sorted;
       }
 
-      if (this.state.ageDirection === 'DESC') {
+      if (this.state.ageDirection === SORT_DIRECTION.DESC) {
         return sorted.reverse();
       }
     }
@@ -129,4 +128,4 @@ class SortableTable extends React.Component<any, any> {
   }
 }
 
-export const component = () => <SortableTable />;
+export default SortableTable;

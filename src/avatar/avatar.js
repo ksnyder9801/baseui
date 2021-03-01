@@ -1,12 +1,12 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 
 import {getOverrides} from '../helpers/overrides.js';
 
@@ -37,6 +37,12 @@ export default class Avatar extends React.Component<PropsT, StateT> {
     this.state = {noImageAvailable: !this.props.src};
   }
 
+  componentDidUpdate(prevProps: PropsT, prevState: StateT) {
+    if (prevProps.src !== this.props.src) {
+      this.setState({noImageAvailable: !this.props.src});
+    }
+  }
+
   handleError = () => {
     this.setState({noImageAvailable: true});
   };
@@ -61,7 +67,9 @@ export default class Avatar extends React.Component<PropsT, StateT> {
         {...rootProps}
       >
         {noImageAvailable ? (
-          <Initials {...initialsProps}>{getInitials(name)}</Initials>
+          <Initials {...initialsProps}>
+            {this.props.initials || getInitials(name)}
+          </Initials>
         ) : (
           <Avatar
             alt={name}

@@ -1,16 +1,18 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 import {styled} from '../styles/index.js';
+import type {StylePropsT} from './types.js';
 
 const DEFAULT = 0;
 const HOVERED = 1;
 const ACTIVE = 2;
 type State = typeof DEFAULT | typeof HOVERED | typeof ACTIVE;
+
 function getState(props): State {
   if (props.$isActive) return ACTIVE;
   if (props.$isHovered) return HOVERED;
@@ -18,14 +20,21 @@ function getState(props): State {
 }
 
 function getOuterColor(props) {
-  const {colors} = props.$theme;
-
-  if (!props.$checked) {
-    if (props.$disabled) return colors.tickMarkFillDisabled;
-    if (props.$isError) return colors.tickBorderError;
+  const {
+    $theme: {colors},
+    $disabled,
+    $checked,
+    $isFocusVisible,
+    $error,
+    $isError,
+  } = props;
+  if ($disabled) return colors.tickFillDisabled;
+  if (!$checked) {
+    if ($isFocusVisible) return colors.borderSelected;
+    if ($error || $isError) return colors.tickBorderError;
     return colors.tickBorder;
   } else {
-    if (props.$isError) {
+    if ($error || $isError) {
       switch (getState(props)) {
         case DEFAULT:
           return colors.tickFillErrorSelected;
@@ -35,7 +44,6 @@ function getOuterColor(props) {
           return colors.tickFillErrorSelectedHoverActive;
       }
     } else {
-      if (props.$disabled) return colors.tickFillDisabled;
       switch (getState(props)) {
         case DEFAULT:
           return colors.tickFillSelected;
@@ -58,7 +66,7 @@ function getInnerColor(props) {
   }
 
   if (!props.$checked) {
-    if (props.$isError) {
+    if (props.$error || props.$isError) {
       switch (getState(props)) {
         case DEFAULT:
           return colors.tickFillError;
@@ -93,11 +101,11 @@ function getLabelPadding(props) {
       paddingDirection = 'Top';
       break;
     case 'left':
-      paddingDirection = 'Right';
+      paddingDirection = $theme.direction === 'rtl' ? 'Left' : 'Right';
       break;
     default:
     case 'right':
-      paddingDirection = 'Left';
+      paddingDirection = $theme.direction === 'rtl' ? 'Right' : 'Left';
       break;
   }
   const {sizing} = $theme;
@@ -110,23 +118,32 @@ function getLabelPadding(props) {
 function getLabelColor(props) {
   const {$disabled, $theme} = props;
   const {colors} = $theme;
-  return $disabled ? colors.foregroundAlt : colors.foreground;
+  return $disabled ? colors.contentSecondary : colors.contentPrimary;
 }
 
-export const RadioGroupRoot = styled('div', props => {
-  const {$disabled, $align} = props;
-  return {
-    flexDirection: $align === 'horizontal' ? 'row' : 'column',
-    display: 'flex',
-    alignItems: $align === 'horizontal' ? 'center' : 'flex-start',
-    cursor: $disabled ? 'not-allowed' : 'pointer',
-  };
-});
+export const RadioGroupRoot = styled<StylePropsT>(
+  'div',
+  // $FlowFixMe - suppressing due to webkit property
+  props => {
+    const {$disabled, $align} = props;
+    return {
+      display: 'flex',
+      flexWrap: 'wrap',
+      flexDirection: $align === 'horizontal' ? 'row' : 'column',
+      alignItems: $align === 'horizontal' ? 'center' : 'flex-start',
+      cursor: $disabled ? 'not-allowed' : 'pointer',
+      '-webkit-tap-highlight-color': 'transparent',
+    };
+  },
+);
 
-export const Root = styled('label', props => {
-  const {$disabled, $hasDescription, $labelPlacement, $theme} = props;
+export const Root = styled<StylePropsT>('label', props => {
+  const {$disabled, $hasDescription, $labelPlacement, $theme, $align} = props;
   const {sizing} = $theme;
-  return {
+  const isHorizontal = $align === 'horizontal';
+
+  const marginAfter = $theme.direction === 'rtl' ? 'Left' : 'Right';
+  return ({
     flexDirection:
       $labelPlacement === 'top' || $labelPlacement === 'bottom'
         ? 'column'
@@ -135,30 +152,41 @@ export const Root = styled('label', props => {
     alignItems: 'center',
     cursor: $disabled ? 'not-allowed' : 'pointer',
     marginTop: sizing.scale200,
-    marginBottom: $hasDescription ? null : sizing.scale200,
-  };
+    [`margin${marginAfter}`]: isHorizontal ? sizing.scale200 : null,
+    marginBottom: $hasDescription && !isHorizontal ? null : sizing.scale200,
+  }: {});
 });
 
-export const RadioMarkInner = styled('div', props => {
+export const RadioMarkInner = styled<StylePropsT>('div', props => {
   const {animation, sizing} = props.$theme;
 
   return {
     backgroundColor: getInnerColor(props),
-    borderRadius: '50%',
-    height: props.$checked ? sizing.scale200 : sizing.scale600,
-    transitionDuration: animation.timing100,
+    borderTopLeftRadius: '50%',
+    borderTopRightRadius: '50%',
+    borderBottomRightRadius: '50%',
+    borderBottomLeftRadius: '50%',
+    height: props.$checked ? sizing.scale200 : sizing.scale550,
+    transitionDuration: animation.timing200,
     transitionTimingFunction: animation.easeOutCurve,
-    width: props.$checked ? sizing.scale200 : sizing.scale600,
+    width: props.$checked ? sizing.scale200 : sizing.scale550,
   };
 });
 
-export const RadioMarkOuter = styled('div', props => {
-  const {sizing} = props.$theme;
+export const RadioMarkOuter = styled<StylePropsT>('div', props => {
+  const {animation, sizing} = props.$theme;
 
-  return {
+  return ({
     alignItems: 'center',
     backgroundColor: getOuterColor(props),
-    borderRadius: '50%',
+    borderTopLeftRadius: '50%',
+    borderTopRightRadius: '50%',
+    borderBottomRightRadius: '50%',
+    borderBottomLeftRadius: '50%',
+    boxShadow:
+      props.$isFocusVisible && props.$checked
+        ? `0 0 0 3px ${props.$theme.colors.accent}`
+        : 'none',
     display: 'flex',
     height: sizing.scale700,
     justifyContent: 'center',
@@ -166,13 +194,16 @@ export const RadioMarkOuter = styled('div', props => {
     marginRight: sizing.scale0,
     marginBottom: sizing.scale0,
     marginLeft: sizing.scale0,
+    outline: 'none',
     verticalAlign: 'middle',
     width: sizing.scale700,
     flexShrink: 0,
-  };
+    transitionDuration: animation.timing200,
+    transitionTimingFunction: animation.easeOutCurve,
+  }: {});
 });
 
-export const Label = styled('div', props => {
+export const Label = styled<StylePropsT>('div', props => {
   const {
     $theme: {typography},
   } = props;
@@ -180,7 +211,7 @@ export const Label = styled('div', props => {
     verticalAlign: 'middle',
     ...getLabelPadding(props),
     color: getLabelColor(props),
-    ...typography.font450,
+    ...typography.LabelMedium,
   };
 });
 
@@ -189,17 +220,29 @@ export const Input = styled('input', {
   opacity: 0,
   width: 0,
   overflow: 'hidden',
-  margin: 0,
-  padding: 0,
+  marginTop: 0,
+  marginRight: 0,
+  marginBottom: 0,
+  marginLeft: 0,
+  paddingTop: 0,
+  paddingRight: 0,
+  paddingBottom: 0,
+  paddingLeft: 0,
   position: 'absolute',
 });
 
-export const Description = styled('div', props => {
+export const Description = styled<StylePropsT>('div', props => {
+  const {$theme, $align} = props;
+  const isHorizontal = $align === 'horizontal';
+  const marginBefore = $theme.direction === 'rtl' ? 'Right' : 'Left';
+  const marginAfter = $theme.direction === 'rtl' ? 'Left' : 'Right';
   return {
-    ...props.$theme.typography.font300,
-    color: props.$theme.colors.colorSecondary,
+    ...$theme.typography.ParagraphSmall,
+    color: $theme.colors.contentSecondary,
     cursor: 'auto',
-    marginLeft: props.$theme.sizing.scale900,
+    [`margin${marginBefore}`]:
+      $align === 'horizontal' ? null : $theme.sizing.scale900,
+    [`margin${marginAfter}`]: isHorizontal ? $theme.sizing.scale200 : null,
     maxWidth: '240px',
   };
 });

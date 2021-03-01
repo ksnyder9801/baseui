@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -29,63 +29,65 @@ export type SharedPropsT = {
   $level: number,
   /** Defines if the nav item is selectable/clickable */
   $selectable: boolean,
+  /** Defines if the nav item is disabled */
+  $disabled: boolean,
 };
 
-type renderItemT = (
-  item: *,
-  props: SharedPropsT & {
-    onSelect?: ({item: *, event: Event | KeyboardEvent}) => mixed,
-    onClick?: (event: Event) => mixed,
-    onKeyDown?: (event: KeyboardEvent) => mixed,
-  },
-) => React.Node;
-
 export type NavPropsT = {
-  /** Defines the current active itemId. Used for the defaut calculation of the $active prop */
+  /** Defines the current active itemId. Used for the default calculation of the $active prop */
   activeItemId: string,
-  /** 
-    Is called on the nav item render to test if the item is currently selected. 
-    If returns true the item will be rendered as an active one 
+  /**
+    Is called on the nav item render to test if the item is currently selected.
+    If returns true the item will be rendered as an active one
     */
   activePredicate: ?(item: *, activeItemId: string) => boolean,
   /** List of navigation items */
   items: Item[],
+  /** Used as a performance optimization if many nav items are rendered. Function provided to
+   *  NavItem component's React.memo call.
+   */
+  itemMemoizationComparator?: (NavItemPropsT, NavItemPropsT) => boolean,
   /** onChange handler that is called when a nav item is selected */
   onChange?: ({item: *, event: Event | KeyboardEvent}) => mixed,
   /** Overrides for the internal elements and components */
   overrides: {
-    Root?: OverrideT<*>,
-    NavItemContainer?: OverrideT<*>,
-    NavLink?: OverrideT<*>,
-    NavItem?: OverrideT<*>,
-    SubNavContainer?: OverrideT<*>,
+    Root?: OverrideT,
+    NavItemContainer?: OverrideT,
+    NavLink?: OverrideT,
+    NavItem?: OverrideT,
+    SubNavContainer?: OverrideT,
   },
-  /** Optional render function that is called instead default item rendering */
-  renderItem: ?renderItemT,
+  /** Optional transform function that is called for each Item */
+  mapItem: ?(item: Item) => Item,
 };
 
 export type Item = {
   /** Navigation item's title to render */
   title: React.Node,
-  /** 
-    Identifier for the navigation item. 
-    Can be a path value or an action name. 
+  /**
+    Identifier for the navigation item.
+    Can be a path value or an action name.
     It's also used in the default `activePredicate` to
     identify a currently active item
     */
   itemId?: string,
   /** A list of sub-navigation items */
-  subnav?: Item[],
+  subNav?: Item[],
+  /** Renders the item in disabled state */
+  disabled?: boolean,
 };
 
 export type NavItemPropsT = SharedPropsT & {
   item: Item,
+  /** Used as a performance optimization if many nav items are rendered. Function provided to
+   *  NavItem component's React.memo call.
+   */
+  itemMemoizationComparator?: (NavItemPropsT, NavItemPropsT) => boolean,
   onSelect?: ({item: *, event: Event | KeyboardEvent}) => mixed,
   overrides: {
-    NavLink?: OverrideT<*>,
-    NavItem?: OverrideT<*>,
+    NavLink?: OverrideT,
+    NavItem?: OverrideT,
   },
-  renderItem?: ?renderItemT,
 };
 
 export type StatefulContainerPropsT = {

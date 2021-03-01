@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -11,7 +11,7 @@ import {getOverrides} from '../helpers/overrides.js';
 import {StyledNavLink, StyledNavItem} from './styled-components.js';
 import type {NavItemPropsT} from './types.js';
 
-export default class NavItem extends React.Component<NavItemPropsT> {
+class NavItem extends React.Component<NavItemPropsT> {
   static defaultProps = {
     overrides: {},
     onSelect: () => {},
@@ -34,34 +34,45 @@ export default class NavItem extends React.Component<NavItemPropsT> {
   };
 
   render() {
-    const {item, onSelect, overrides, renderItem, ...sharedProps} = this.props;
+    const {
+      item,
+      overrides,
+      itemMemoizationComparator,
+      ...sharedProps
+    } = this.props;
+
     const [NavItem, itemProps] = getOverrides(overrides.NavItem, StyledNavItem);
     const [NavLink, linkProps] = getOverrides(overrides.NavLink, StyledNavLink);
-    const navItemProps = {
-      ...sharedProps,
-      onSelect: onSelect,
-      onClick: this.handleClick,
-      onKeyDown: this.handleKeyDown,
+    const tabIndex = {
+      tabIndex: item.disabled ? -1 : undefined,
     };
-    if (typeof renderItem === 'function') {
-      return renderItem(item, navItemProps);
-    }
     return (
       <NavLink
-        href={item.itemId}
+        $as={item.disabled ? 'span' : 'a'}
+        href={item.disabled ? null : item.itemId}
+        {...tabIndex}
         {...sharedProps}
         {...linkProps}
-        {...(item.itemId
+        {...(item.itemId && !item.disabled
           ? {
               onClick: this.handleClick,
               onKeyDown: this.handleKeyDown,
             }
           : {})}
       >
-        <NavItem {...sharedProps} {...itemProps}>
+        <NavItem item={item} {...sharedProps} {...itemProps}>
           {item.title}
         </NavItem>
       </NavLink>
     );
   }
 }
+
+function compare(prevProps, nextProps) {
+  if (nextProps.itemMemoizationComparator) {
+    return nextProps.itemMemoizationComparator(prevProps, nextProps);
+  }
+  return false;
+}
+
+export default React.memo<NavItemPropsT>(NavItem, compare);

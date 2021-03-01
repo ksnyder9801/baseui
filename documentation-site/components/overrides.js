@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -7,7 +7,7 @@ LICENSE file in the root directory of this source tree.
 
 /* eslint-disable flowtype/require-valid-file-annotation */
 
-import React from 'react';
+import * as React from 'react';
 import {Block} from 'baseui/block';
 import {Radio, RadioGroup} from 'baseui/radio';
 import {DocLink} from './markdown-elements';
@@ -47,15 +47,13 @@ class Overrides extends React.Component {
     );
     return (
       <React.Fragment>
-        <Block as="p" font="font400">
+        <Block as="p" font="font300">
           Additionally, you can{' '}
-          <DocLink href="/theming/understanding-overrides">
-            fully customize
-          </DocLink>{' '}
-          any part of the <strong>{name}</strong> through the{' '}
-          <strong>overrides</strong> prop. The {name} consists of multiple
-          subcomponents that are listed bellow and you can override each one of
-          them. To help you identify the names of these subcomponents,{' '}
+          <DocLink href="/guides/theming">fully customize</DocLink> any part of
+          the <strong>{name}</strong> through the <strong>overrides</strong>{' '}
+          prop. The {name} consists of multiple subcomponents that are listed
+          bellow and you can override each one of them. To help you identify the
+          names of these subcomponents,{' '}
           <strong>you can highlight them through this selector:</strong>
         </Block>
         <RadioGroup
@@ -76,15 +74,21 @@ class Overrides extends React.Component {
           {renderExample({
             overrides: {
               [this.state.highlighted]: {
-                style: props => ({
-                  outline: `2px solid ${props.$theme.colors.warning200}`,
-                  backgroundColor: props.$theme.colors.warning200,
-                }),
+                style: ({$theme}) =>
+                  $theme.name.startsWith('dark')
+                    ? {
+                        outline: `2px solid ${$theme.colors.warning600}`,
+                        backgroundColor: $theme.colors.warning600,
+                      }
+                    : {
+                        outline: `2px solid ${$theme.colors.warning200}`,
+                        backgroundColor: $theme.colors.warning200,
+                      },
               },
             },
           })}
         </Block>
-        <Block as="p" font="font400" marginTop="scale900">
+        <Block as="p" font="font300" marginTop="scale900">
           <b>Note:</b> You should always use longhand CSS properties. Mixing
           shorthands and longhands will lead into{' '}
           <DocLink href="https://www.styletron.org/concepts/#shorthand-and-longhand-properties">

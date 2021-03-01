@@ -1,25 +1,23 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
 */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 
 import {Navigation} from '../index.js';
-
-export const name = 'side-navigation';
 
 const nav = [
   {
     title: 'Colors',
-    subnav: [
+    subNav: [
       {
         title: 'Shades',
         itemId: '/',
-        subnav: [
+        subNav: [
           {
             title: 'Light',
             itemId: '#level1.1.1.1',
@@ -31,6 +29,7 @@ const nav = [
   {
     title: 'Sizing',
     itemId: '#level1.2',
+    disabled: true,
   },
   {
     title: 'Typography',
@@ -38,6 +37,8 @@ const nav = [
   },
 ];
 
-export const component = () => (
-  <Navigation items={nav} overrides={{Root: {props: {'data-test': 'e2e'}}}} />
-);
+export default function Scenario() {
+  return (
+    <Navigation items={nav} overrides={{Root: {props: {'data-test': 'e2e'}}}} />
+  );
+}

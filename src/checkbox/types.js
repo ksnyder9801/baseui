@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 Uber Technologies, Inc.
+Copyright (c) 2018-2020 Uber Technologies, Inc.
 
 This source code is licensed under the MIT license found in the
 LICENSE file in the root directory of this source tree.
@@ -13,13 +13,13 @@ export type LabelPlacementT = 'top' | 'right' | 'bottom' | 'left';
 export type StyleTypeT = $Keys<typeof STYLE_TYPE>;
 
 export type OverridesT = {
-  Checkmark?: OverrideT<*>,
-  Label?: OverrideT<*>,
-  Root?: OverrideT<*>,
-  Input?: OverrideT<*>,
-  Toggle?: OverrideT<*>,
-  ToggleInner?: OverrideT<*>,
-  ToggleTrack?: OverrideT<*>,
+  Checkmark?: OverrideT,
+  Label?: OverrideT,
+  Root?: OverrideT,
+  Input?: OverrideT,
+  Toggle?: OverrideT,
+  ToggleInner?: OverrideT,
+  ToggleTrack?: OverrideT,
 };
 
 export type DefaultPropsT = {
@@ -27,9 +27,10 @@ export type DefaultPropsT = {
   checked: boolean,
   disabled: boolean,
   isError: boolean,
+  error: boolean,
   autoFocus: boolean,
   isIndeterminate: boolean,
-  inputRef: {current: ?HTMLInputElement},
+  inputRef: {current: HTMLInputElement | null},
   checkmarkType: StyleTypeT,
   onChange: (e: SyntheticInputEvent<HTMLInputElement>) => mixed,
   onMouseEnter: (e: SyntheticInputEvent<HTMLInputElement>) => mixed,
@@ -41,6 +42,12 @@ export type DefaultPropsT = {
 };
 
 export type PropsT = {
+  /** Id of element which contains a related caption */
+  'aria-describedby'?: string,
+  /** Id of element which contains a related error message */
+  'aria-errormessage'?: string,
+  /** Passed to the input element aria-label attribute. */
+  ariaLabel?: string,
   /** Component or String value for label of checkbox. */
   children?: React$Node,
   overrides?: OverridesT,
@@ -51,9 +58,11 @@ export type PropsT = {
   /** Marks the checkbox as required. */
   required?: boolean,
   /** Renders checkbox in errored state. */
+  error?: boolean,
+  /** You should use error instead. */
   isError?: boolean,
   /** Used to get a ref to the input element. Useful for programmatically focusing the input */
-  inputRef: {current: ?HTMLInputElement},
+  inputRef: {current: HTMLInputElement | null},
   /** Focus the checkbox on initial render. */
   autoFocus?: boolean,
   /** Passed to the input element type attribute */
@@ -68,7 +77,8 @@ export type PropsT = {
   labelPlacement?: LabelPlacementT,
   /** Renders UI as checkmark or toggle switch. */
   checkmarkType: StyleTypeT,
-  $theme?: *,
+  /** Text to display in native OS tooltip on long hover. */
+  title?: ?string,
   /** Handler for change events on trigger element. */
   onChange?: (e: SyntheticInputEvent<HTMLInputElement>) => mixed,
   /** Handler for mouseenter events on trigger element. */
@@ -87,6 +97,7 @@ export type PropsT = {
 
 export type StatelessStateT = {
   isFocused: boolean,
+  isFocusVisible: boolean,
   isHovered: boolean,
   isActive: boolean,
 };
@@ -154,4 +165,20 @@ export type StatefulCheckboxPropsT = {
   onFocus?: (e: SyntheticInputEvent<HTMLInputElement>) => mixed,
   /** Handler for blur events on trigger element. */
   onBlur?: (e: SyntheticInputEvent<HTMLInputElement>) => mixed,
+};
+
+export type SharedStylePropsT = {
+  $isFocused: boolean,
+  $isFocusVisible: boolean,
+  $isHovered: boolean,
+  $isActive: boolean,
+  $isError: boolean,
+  $error: boolean,
+  $checked: boolean,
+  $isIndeterminate: boolean,
+  $required: boolean,
+  $disabled: boolean,
+  $value: string,
+  $checkmarkType: StyleTypeT,
+  $labelPlacement: LabelPlacementT,
 };
